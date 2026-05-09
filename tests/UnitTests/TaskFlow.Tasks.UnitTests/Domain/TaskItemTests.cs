@@ -129,7 +129,111 @@ public class TaskItemTests
 
 
 
+    [Fact]
+    public void Start_Should_Change_Status_From_Todo_To_InProgress()
+    {
+        // Arrange
+        // A newly created task starts with Todo status.
+        var task = TaskItem.Create(
+            title: "Implement task status transitions",
+            description: "Add domain rules for changing task status",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
 
+        // Act
+        // Starting a task should move it to InProgress.
+        task.Start();
+
+        // Assert
+        Assert.Equal(TaskItemStatus.InProgress, task.Status);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+    [Fact]
+    public void Complete_Should_Change_Status_From_InProgress_To_Done()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Complete domain behavior",
+            description: "Complete task status transition implementation",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        task.Start();
+
+        // Act
+        task.Complete();
+
+        // Assert
+        Assert.Equal(TaskItemStatus.Done, task.Status);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+
+
+
+    [Fact]
+    public void Complete_Should_Throw_Exception_When_Task_Is_Not_InProgress()
+    {
+        // Arrange
+        // A new task is Todo by default.
+        // It should not be completed before being started.
+        var task = TaskItem.Create(
+            title: "Invalid transition",
+            description: "Trying to complete a task before starting it",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        // Act
+        var act = () => task.Complete();
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
+    }
+
+
+    [Fact]
+    public void Cancel_Should_Change_Status_To_Cancelled_When_Task_Is_Not_Done()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Cancel task",
+            description: "Cancel a task that is not completed",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        // Act
+        task.Cancel();
+
+        // Assert
+        Assert.Equal(TaskItemStatus.Cancelled, task.Status);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+
+
+
+    [Fact]
+    public void Cancel_Should_Throw_Exception_When_Task_Is_Done()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Completed task",
+            description: "A completed task should not be cancelled",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        task.Start();
+        task.Complete();
+
+        // Act
+        var act = () => task.Cancel();
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(act);
+    }
 
 
 
