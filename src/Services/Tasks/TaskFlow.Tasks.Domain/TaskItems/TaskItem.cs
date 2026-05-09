@@ -89,6 +89,49 @@ public sealed class TaskItem : Entity
         ));
     }
 
+    /// <summary>
+    /// Moves the task from Todo to InProgress.
+    /// </summary>
+    public void Start()
+    {
+        if (Status != TaskItemStatus.Todo)
+        {
+            throw new InvalidOperationException("Only tasks in Todo status can be started.");
+        }
+
+        Status = TaskItemStatus.InProgress;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Marks the task as completed.
+    /// Only tasks that are already in progress can be completed.
+    /// </summary>
+    public void Complete()
+    {
+        if (Status != TaskItemStatus.InProgress)
+        {
+            throw new InvalidOperationException("Only tasks in progress can be completed.");
+        }
+
+        Status = TaskItemStatus.Done;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
+
+    /// <summary>
+    /// Cancels the task if it has not already been completed.
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status == TaskItemStatus.Done)
+        {
+            throw new InvalidOperationException("Completed tasks cannot be cancelled.");
+        }
+
+        Status = TaskItemStatus.Cancelled;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
 
 
 }
