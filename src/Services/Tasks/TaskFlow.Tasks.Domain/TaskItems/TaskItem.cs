@@ -1,6 +1,9 @@
-﻿namespace TaskFlow.Tasks.Domain.TaskItems;
+﻿
+using TaskFlow.SharedKernel.Domain;
+using TaskFlow.Tasks.Domain.TaskItems.Events;
+namespace TaskFlow.Tasks.Domain.TaskItems;
 
-public sealed class TaskItem
+public sealed class TaskItem : Entity
 {
     private TaskItem()
     {
@@ -64,4 +67,28 @@ public sealed class TaskItem
             createdByUserId,
             dueDate);
     }
+
+
+    /// <summary>
+    /// Assigns the task to a user and raises a domain event.
+    /// </summary>
+    public void AssignTo(Guid userId)
+    {
+        if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("Assigned user id cannot be empty.", nameof(userId));
+        }
+
+        AssignedToUserId = userId;
+        UpdatedAtUtc = DateTime.UtcNow;
+
+        RaiseDomainEvent(new TaskAssignedDomainEvent(
+            Id,
+            userId,
+            DateTime.UtcNow
+        ));
+    }
+
+
+
 }

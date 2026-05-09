@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskFlow.Tasks.Domain.TaskItems;
+using TaskFlow.Tasks.Domain.TaskItems.Events;
 
 namespace TaskFlow.Tasks.UnitTests.Domain;
 
@@ -53,6 +54,84 @@ public class TaskItemTests
 
         Assert.Throws<ArgumentException>(act);
     }
+
+
+
+    [Fact]
+    public void AssignTo_Should_Assign_Task_To_User()
+    {
+        // Arrange
+        // Create a valid task first. Assignment is a behavior of an existing task.
+        var task = TaskItem.Create(
+            title: "Implement notifications",
+            description: "Add real-time notifications using SignalR",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        var assignedToUserId = Guid.NewGuid();
+
+        // Act
+        // Execute the domain behavior.
+        task.AssignTo(assignedToUserId);
+
+        // Assert
+        // The task should now be assigned to the selected user.
+        Assert.Equal(assignedToUserId, task.AssignedToUserId);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void AssignTo_Should_Throw_Exception_When_UserId_Is_Empty()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Implement notifications",
+            description: "Add real-time notifications using SignalR",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        // Act
+        var act = () => task.AssignTo(Guid.Empty);
+
+        // Assert
+        // A task cannot be assigned to an unknown user.
+        Assert.Throws<ArgumentException>(act);
+    }
+
+    [Fact]
+    public void AssignTo_Should_Raise_TaskAssignedDomainEvent()
+    {
+        // Arrange
+        // Domain events allow the aggregate to record important business facts
+        // without directly calling infrastructure concerns like message brokers.
+        var task = TaskItem.Create(
+            title: "Implement notifications",
+            description: "Add real-time notifications using SignalR",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        var assignedToUserId = Guid.NewGuid();
+
+        // Act
+        task.AssignTo(assignedToUserId);
+
+        // Assert
+        var domainEvent = Assert.Single(task.DomainEvents);
+
+        var taskAssignedEvent = Assert.IsType<TaskAssignedDomainEvent>(domainEvent);
+
+        Assert.Equal(task.Id, taskAssignedEvent.TaskId);
+        Assert.Equal(assignedToUserId, taskAssignedEvent.AssignedToUserId);
+    }
+
+
+
+
+
+
 
 }
 
