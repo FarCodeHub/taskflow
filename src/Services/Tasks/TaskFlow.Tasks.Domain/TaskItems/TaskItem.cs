@@ -42,6 +42,8 @@ public sealed class TaskItem : Entity
     public DateTime CreatedAtUtc { get; private set; }
 
     public DateTime? UpdatedAtUtc { get; private set; }
+    private readonly List<TaskComment> _comments = [];
+    public IReadOnlyCollection<TaskComment> Comments => _comments.AsReadOnly();
 
     public static TaskItem Create(
         string title,
@@ -133,5 +135,26 @@ public sealed class TaskItem : Entity
         UpdatedAtUtc = DateTime.UtcNow;
     }
 
+    public void AddComment(Guid userId, string text)
+    {
+        if (userId == Guid.Empty)
+        {
+            throw new ArgumentException("Comment user id cannot be empty.", nameof(userId));
+        }
 
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("Comment text cannot be empty.", nameof(text));
+        }
+
+        var comment = new TaskComment(
+            Guid.NewGuid(),
+            userId,
+            text.Trim(),
+            DateTime.UtcNow
+        );
+
+        _comments.Add(comment);
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
 }

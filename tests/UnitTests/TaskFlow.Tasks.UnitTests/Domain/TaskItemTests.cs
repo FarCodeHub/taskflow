@@ -236,6 +236,91 @@ public class TaskItemTests
     }
 
 
+    [Fact]
+    public void AddComment_Should_Add_Comment_To_Task()
+    {
+        // Arrange
+        // A comment belongs to a task and should be added through the aggregate root.
+        var task = TaskItem.Create(
+            title: "Add task comments",
+            description: "Allow users to add comments to a task",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
 
+        var userId = Guid.NewGuid();
+        var commentText = "This task needs more details.";
+
+        // Act
+        task.AddComment(userId, commentText);
+
+        // Assert
+        var comment = Assert.Single(task.Comments);
+
+        Assert.Equal(userId, comment.UserId);
+        Assert.Equal(commentText, comment.Text);
+        Assert.NotEqual(Guid.Empty, comment.Id);
+    }
+
+
+    [Fact]
+    public void AddComment_Should_Throw_Exception_When_UserId_Is_Empty()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Invalid comment user",
+            description: "Comment user id should be required",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        // Act
+        var act = () => task.AddComment(Guid.Empty, "Valid comment text");
+
+        // Assert
+        Assert.Throws<ArgumentException>(act);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void AddComment_Should_Throw_Exception_When_Text_Is_Empty(string text)
+    {
+        // Arrange
+        // Theory allows the same test logic to run with multiple invalid inputs.
+        var task = TaskItem.Create(
+            title: "Invalid comment text",
+            description: "Comment text should be required",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        // Act
+        var act = () => task.AddComment(Guid.NewGuid(), text);
+
+        // Assert
+        Assert.Throws<ArgumentException>(act);
+    }
+
+
+    [Fact]
+    public void AddComment_Should_Trim_Comment_Text()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Trim comment",
+            description: "Comment text should be normalized",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        // Act
+        task.AddComment(Guid.NewGuid(), "  Please review this task.  ");
+
+        // Assert
+        var comment = Assert.Single(task.Comments);
+
+        Assert.Equal("Please review this task.", comment.Text);
+    }
 }
 
