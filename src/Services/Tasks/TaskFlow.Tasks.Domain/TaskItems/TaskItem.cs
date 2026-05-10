@@ -55,17 +55,17 @@ public sealed class TaskItem : Entity
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Task title cannot be empty.", nameof(title));
+            throw new TaskItemDomainException("Task title cannot be empty.");
         }
 
         if (createdByUserId == Guid.Empty)
         {
-            throw new ArgumentException("Created by user id cannot be empty.", nameof(createdByUserId));
+            throw new TaskItemDomainException("Created by user id cannot be empty.");
         }
 
         if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
         {
-            throw new ArgumentException("Due date cannot be in the past.", nameof(dueDate));
+            throw new TaskItemDomainException("Due date cannot be in the past.");
         }
 
         return new TaskItem(
@@ -84,7 +84,7 @@ public sealed class TaskItem : Entity
     {
         if (userId == Guid.Empty)
         {
-            throw new ArgumentException("Assigned user id cannot be empty.", nameof(userId));
+            throw new TaskItemDomainException("Assigned user id cannot be empty.");
         }
 
         AssignedToUserId = userId;
@@ -104,7 +104,7 @@ public sealed class TaskItem : Entity
     {
         if (Status != TaskItemStatus.Todo)
         {
-            throw new InvalidOperationException("Only tasks in Todo status can be started.");
+            throw new TaskItemDomainException("Only tasks in Todo status can be started.");
         }
 
         Status = TaskItemStatus.InProgress;
@@ -119,7 +119,7 @@ public sealed class TaskItem : Entity
     {
         if (Status != TaskItemStatus.InProgress)
         {
-            throw new InvalidOperationException("Only tasks in progress can be completed.");
+            throw new TaskItemDomainException("Only tasks in progress can be completed.");
         }
 
         Status = TaskItemStatus.Done;
@@ -134,7 +134,7 @@ public sealed class TaskItem : Entity
     {
         if (Status == TaskItemStatus.Done)
         {
-            throw new InvalidOperationException("Completed tasks cannot be cancelled.");
+            throw new TaskItemDomainException("Completed tasks cannot be cancelled.");
         }
 
         Status = TaskItemStatus.Cancelled;
@@ -145,12 +145,12 @@ public sealed class TaskItem : Entity
     {
         if (userId == Guid.Empty)
         {
-            throw new ArgumentException("Comment user id cannot be empty.", nameof(userId));
+            throw new TaskItemDomainException("Comment user id cannot be empty.");
         }
 
         if (string.IsNullOrWhiteSpace(text))
         {
-            throw new ArgumentException("Comment text cannot be empty.", nameof(text));
+            throw new TaskItemDomainException("Comment text cannot be empty.");
         }
 
         var comment = new TaskComment(
@@ -182,7 +182,7 @@ public sealed class TaskItem : Entity
     {
         if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
         {
-            throw new ArgumentException("Due date cannot be in the past.", nameof(dueDate));
+            throw new TaskItemDomainException("Due date cannot be in the past.");
         }
 
         DueDate = dueDate;
