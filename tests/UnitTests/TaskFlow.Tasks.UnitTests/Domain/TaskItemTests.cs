@@ -39,7 +39,7 @@ public class TaskItemTests
             dueDate: DateTime.UtcNow.AddDays(1)
         );
 
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class TaskItemTests
             dueDate: DateTime.UtcNow.AddDays(1)
         );
 
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
 
@@ -97,7 +97,7 @@ public class TaskItemTests
 
         // Assert
         // A task cannot be assigned to an unknown user.
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
     [Fact]
@@ -189,7 +189,7 @@ public class TaskItemTests
         var act = () => task.Complete();
 
         // Assert
-        Assert.Throws<InvalidOperationException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
 
@@ -232,7 +232,7 @@ public class TaskItemTests
         var act = () => task.Cancel();
 
         // Assert
-        Assert.Throws<InvalidOperationException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
 
@@ -278,7 +278,7 @@ public class TaskItemTests
         var act = () => task.AddComment(Guid.Empty, "Valid comment text");
 
         // Assert
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
     [Theory]
@@ -299,7 +299,7 @@ public class TaskItemTests
         var act = () => task.AddComment(Guid.NewGuid(), text);
 
         // Assert
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
 
@@ -379,7 +379,7 @@ public class TaskItemTests
         );
 
         // Assert
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
 
 
@@ -421,8 +421,26 @@ public class TaskItemTests
         var act = () => task.ChangeDueDate(pastDueDate);
 
         // Assert
-        Assert.Throws<ArgumentException>(act);
+        Assert.Throws<TaskItemDomainException>(act);
     }
+    [Fact]
+    public void Create_Should_Return_Clear_Error_Message_When_Title_Is_Empty()
+    {
+        // Arrange
+        var title = "";
 
+        // Act
+        var exception = Assert.Throws<TaskItemDomainException>(() =>
+            TaskItem.Create(
+                title,
+                description: "Description",
+                createdByUserId: Guid.NewGuid(),
+                dueDate: DateTime.UtcNow.AddDays(1)
+            )
+        );
+
+        // Assert
+        Assert.Equal("Task title cannot be empty.", exception.Message);
+    }
 }
 
