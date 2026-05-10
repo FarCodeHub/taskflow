@@ -14,7 +14,8 @@ public sealed class TaskItem : Entity
         string title,
         string? description,
         Guid createdByUserId,
-        DateTime? dueDate)
+        DateTime? dueDate
+        )
     {
         Id = id;
         Title = title;
@@ -23,6 +24,7 @@ public sealed class TaskItem : Entity
         DueDate = dueDate;
         Status = TaskItemStatus.Todo;
         CreatedAtUtc = DateTime.UtcNow;
+        Priority = TaskPriority.Medium;
     }
 
     public Guid Id { get; private set; }
@@ -44,7 +46,7 @@ public sealed class TaskItem : Entity
     public DateTime? UpdatedAtUtc { get; private set; }
     private readonly List<TaskComment> _comments = [];
     public IReadOnlyCollection<TaskComment> Comments => _comments.AsReadOnly();
-
+    public TaskPriority Priority { get; private set; }
     public static TaskItem Create(
         string title,
         string? description,
@@ -61,6 +63,10 @@ public sealed class TaskItem : Entity
             throw new ArgumentException("Created by user id cannot be empty.", nameof(createdByUserId));
         }
 
+        if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
+        {
+            throw new ArgumentException("Due date cannot be in the past.", nameof(dueDate));
+        }
 
         return new TaskItem(
             Guid.NewGuid(),
@@ -157,4 +163,30 @@ public sealed class TaskItem : Entity
         _comments.Add(comment);
         UpdatedAtUtc = DateTime.UtcNow;
     }
+
+
+    /// <summary>
+    /// Changes the task priority manually.
+    /// AI-based priority suggestion will be added in a later phase.
+    /// </summary>
+    public void ChangePriority(TaskPriority priority)
+    {
+        Priority = priority;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+    /// <summary>
+    /// Changes the due date of the task.
+    /// Due date must not be in the past.
+    /// </summary>
+    public void ChangeDueDate(DateTime? dueDate)
+    {
+        if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
+        {
+            throw new ArgumentException("Due date cannot be in the past.", nameof(dueDate));
+        }
+
+        DueDate = dueDate;
+        UpdatedAtUtc = DateTime.UtcNow;
+    }
+
 }

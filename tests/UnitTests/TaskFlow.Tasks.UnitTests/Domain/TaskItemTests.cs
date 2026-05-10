@@ -322,5 +322,107 @@ public class TaskItemTests
 
         Assert.Equal("Please review this task.", comment.Text);
     }
+
+
+    [Fact]
+    public void Create_Should_Create_Task_With_Medium_Priority_By_Default()
+    {
+        // Arrange
+        // Priority is set to Medium by default to keep task creation simple.
+        // Later, the AI service can suggest a different priority.
+        var createdByUserId = Guid.NewGuid();
+
+        // Act
+        var task = TaskItem.Create(
+            title: "Add task priority",
+            description: "Add default priority to task aggregate",
+            createdByUserId: createdByUserId,
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        // Assert
+        Assert.Equal(TaskPriority.Medium, task.Priority);
+    }
+
+    [Fact]
+    public void ChangePriority_Should_Update_Task_Priority()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Change priority",
+            description: "Allow changing task priority manually",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(2)
+        );
+
+        // Act
+        task.ChangePriority(TaskPriority.High);
+
+        // Assert
+        Assert.Equal(TaskPriority.High, task.Priority);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+
+    [Fact]
+    public void Create_Should_Throw_Exception_When_DueDate_Is_In_The_Past()
+    {
+        // Arrange
+        // A due date in the past is invalid because a new task should not be overdue at creation time.
+        var pastDueDate = DateTime.UtcNow.AddDays(-1);
+
+        // Act
+        var act = () => TaskItem.Create(
+            title: "Invalid due date",
+            description: "Due date should not be in the past",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: pastDueDate
+        );
+
+        // Assert
+        Assert.Throws<ArgumentException>(act);
+    }
+
+
+
+    [Fact]
+    public void ChangeDueDate_Should_Update_DueDate()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Change due date",
+            description: "Allow changing task due date",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        var newDueDate = DateTime.UtcNow.AddDays(5);
+
+        // Act
+        task.ChangeDueDate(newDueDate);
+
+        // Assert
+        Assert.Equal(newDueDate, task.DueDate);
+        Assert.NotNull(task.UpdatedAtUtc);
+    }
+    [Fact]
+    public void ChangeDueDate_Should_Throw_Exception_When_DueDate_Is_In_The_Past()
+    {
+        // Arrange
+        var task = TaskItem.Create(
+            title: "Invalid due date update",
+            description: "Changing due date to past should fail",
+            createdByUserId: Guid.NewGuid(),
+            dueDate: DateTime.UtcNow.AddDays(1)
+        );
+
+        var pastDueDate = DateTime.UtcNow.AddDays(-1);
+
+        // Act
+        var act = () => task.ChangeDueDate(pastDueDate);
+
+        // Assert
+        Assert.Throws<ArgumentException>(act);
+    }
+
 }
 
