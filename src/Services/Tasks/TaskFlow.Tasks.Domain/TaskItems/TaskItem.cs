@@ -1,5 +1,6 @@
 ﻿
 using TaskFlow.SharedKernel.Domain;
+using TaskFlow.SharedKernel.Time;
 using TaskFlow.Tasks.Domain.TaskItems.Events;
 namespace TaskFlow.Tasks.Domain.TaskItems;
 
@@ -14,7 +15,8 @@ public sealed class TaskItem : Entity
         string title,
         string? description,
         Guid createdByUserId,
-        DateTime? dueDate
+        DateTime? dueDate,
+        DateTime createdAtUtc
         )
     {
         Id = id;
@@ -25,6 +27,7 @@ public sealed class TaskItem : Entity
         Status = TaskItemStatus.Todo;
         CreatedAtUtc = DateTime.UtcNow;
         Priority = TaskPriority.Medium;
+        CreatedAtUtc = createdAtUtc;
     }
 
     public Guid Id { get; private set; }
@@ -51,7 +54,8 @@ public sealed class TaskItem : Entity
         string title,
         string? description,
         Guid createdByUserId,
-        DateTime? dueDate)
+        DateTime? dueDate,
+        IDateTimeProvider dateTimeProvider)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -63,7 +67,7 @@ public sealed class TaskItem : Entity
             throw new TaskItemDomainException("Created by user id cannot be empty.");
         }
 
-        if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
+        if (dueDate.HasValue && dueDate.Value < dateTimeProvider.UtcNow)
         {
             throw new TaskItemDomainException("Due date cannot be in the past.");
         }
@@ -73,14 +77,15 @@ public sealed class TaskItem : Entity
             title,
             description,
             createdByUserId,
-            dueDate);
+            dueDate,
+            dateTimeProvider.UtcNow);
     }
 
 
     /// <summary>
     /// Assigns the task to a user and raises a domain event.
     /// </summary>
-    public void AssignTo(Guid userId)
+    public void AssignTo(Guid userId, IDateTimeProvider dateTimeProvider)
     {
         if (userId == Guid.Empty)
         {
@@ -88,19 +93,19 @@ public sealed class TaskItem : Entity
         }
 
         AssignedToUserId = userId;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc =dateTimeProvider.UtcNow;
 
         RaiseDomainEvent(new TaskAssignedDomainEvent(
             Id,
             userId,
-            DateTime.UtcNow
+            dateTimeProvider.UtcNow
         ));
     }
 
     /// <summary>
     /// Moves the task from Todo to InProgress.
     /// </summary>
-    public void Start()
+    public void Start(IDateTimeProvider dateTimeProvider)
     {
         if (Status != TaskItemStatus.Todo)
         {
@@ -108,14 +113,14 @@ public sealed class TaskItem : Entity
         }
 
         Status = TaskItemStatus.InProgress;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = dateTimeProvider.UtcNow;
     }
 
     /// <summary>
     /// Marks the task as completed.
     /// Only tasks that are already in progress can be completed.
     /// </summary>
-    public void Complete()
+    public void Complete(IDateTimeProvider dateTimeProvider)
     {
         if (Status != TaskItemStatus.InProgress)
         {
@@ -123,14 +128,14 @@ public sealed class TaskItem : Entity
         }
 
         Status = TaskItemStatus.Done;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc =   dateTimeProvider.UtcNow;
     }
 
 
     /// <summary>
     /// Cancels the task if it has not already been completed.
     /// </summary>
-    public void Cancel()
+    public void Cancel(IDateTimeProvider dateTimeProvider)
     {
         if (Status == TaskItemStatus.Done)
         {
@@ -138,10 +143,10 @@ public sealed class TaskItem : Entity
         }
 
         Status = TaskItemStatus.Cancelled;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = dateTimeProvider.UtcNow;
     }
 
-    public void AddComment(Guid userId, string text)
+    public void AddComment(Guid userId, string text, IDateTimeProvider dateTimeProvider)
     {
         if (userId == Guid.Empty)
         {
@@ -157,11 +162,11 @@ public sealed class TaskItem : Entity
             Guid.NewGuid(),
             userId,
             text.Trim(),
-            DateTime.UtcNow
+            dateTimeProvider.UtcNow
         );
 
         _comments.Add(comment);
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = dateTimeProvider.UtcNow;
     }
 
 
@@ -169,24 +174,24 @@ public sealed class TaskItem : Entity
     /// Changes the task priority manually.
     /// AI-based priority suggestion will be added in a later phase.
     /// </summary>
-    public void ChangePriority(TaskPriority priority)
+    public void ChangePriority(TaskPriority priority, IDateTimeProvider dateTimeProvider)
     {
         Priority = priority;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = dateTimeProvider.UtcNow;
     }
     /// <summary>
     /// Changes the due date of the task.
     /// Due date must not be in the past.
     /// </summary>
-    public void ChangeDueDate(DateTime? dueDate)
+    public void ChangeDueDate(DateTime? dueDate,IDateTimeProvider dateTimeProvider)
     {
-        if (dueDate.HasValue && dueDate.Value < DateTime.UtcNow)
+        if (dueDate.HasValue && dueDate.Value < dateTimeProvider.UtcNow)
         {
             throw new TaskItemDomainException("Due date cannot be in the past.");
         }
 
         DueDate = dueDate;
-        UpdatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = dateTimeProvider.UtcNow;
     }
 
 }
