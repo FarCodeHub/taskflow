@@ -31,7 +31,7 @@ public class ValidationBehaviorTests
 
         var expectedTaskId = Guid.NewGuid();
 
-        RequestHandlerDelegate<Guid> next = (_) => Task.FromResult(expectedTaskId);
+        RequestHandlerDelegate<Guid> next = () => Task.FromResult(expectedTaskId);
 
         // Act
         var result = await behavior.Handle(request, next, CancellationToken.None);
@@ -59,7 +59,7 @@ public class ValidationBehaviorTests
             DueDate: DateTime.UtcNow.AddDays(1)
         );
 
-        RequestHandlerDelegate<Guid> next = (_) => Task.FromResult(Guid.NewGuid());
+        RequestHandlerDelegate<Guid> next = () => Task.FromResult(Guid.NewGuid());
 
         // Act
         var act = () => behavior.Handle(request, next, CancellationToken.None);
@@ -91,7 +91,7 @@ public class ValidationBehaviorTests
 
         var nextWasCalled = false;
 
-        RequestHandlerDelegate<Guid> next = (_) =>
+        RequestHandlerDelegate<Guid> next = () =>
         {
             nextWasCalled = true;
             return Task.FromResult(Guid.NewGuid());
