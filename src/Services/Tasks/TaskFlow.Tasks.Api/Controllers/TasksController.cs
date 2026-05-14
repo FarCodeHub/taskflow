@@ -8,26 +8,26 @@ namespace TaskFlow.Tasks.Api.Controllers;
 [Route("api/tasks")]
 public sealed class TasksController : ControllerBase
 {
-    // private readonly IMediator _mediator;
+    private readonly ISender _sender;
 
-    // public TasksController(IMediator mediator)
-    // {
-    //     _mediator = mediator;
-    // }
+    public TasksController(ISender sender)
+    {
+        _sender = sender;
+    }
 
-    // /// <summary>
-    // /// Creates a new task.
-    // /// </summary>
-    // [HttpPost]
-    // public async Task<IActionResult> Create(
-    //     [FromBody] CreateTaskCommand command,
-    //     CancellationToken cancellationToken)
-    // {
-    //     var taskId = await _mediator.Send(command, cancellationToken);
+    /// <summary>
+    /// Creates a new task.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateTaskCommand command,
+        CancellationToken cancellationToken)
+    {
+        var taskId = await _sender.Send(command, cancellationToken);
 
-    //     return CreatedAtAction(
-    //         nameof(Create),
-    //         new { id = taskId },
-    //         taskId);
-    // }
+        return CreatedAtAction(
+            nameof(Create),
+            new { id = taskId },
+            taskId);
+    }
 }
