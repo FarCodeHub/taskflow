@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -24,6 +26,7 @@
     <ProjectReference Include="..\..\..\src\Services\Tasks\TaskFlow.Tasks.Domain\TaskFlow.Tasks.Domain.csproj" />
     <ProjectReference Include="..\..\..\src\BuildingBlocks\TaskFlow.SharedKernel\TaskFlow.SharedKernel.csproj" />
     <ProjectReference Include="..\..\Common\TaskFlow.TestCommon\TaskFlow.TestCommon.csproj" />
+    <ProjectReference Include="..\..\..\src\Services\Tasks\TaskFlow.Tasks.Api\TaskFlow.Tasks.Api.csproj" />
     
   </ItemGroup>
 
