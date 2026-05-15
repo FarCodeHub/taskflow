@@ -15,6 +15,10 @@ public sealed class ExceptionHandlingMiddleware
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
+
+
+
+
     public ExceptionHandlingMiddleware(
         RequestDelegate next,
         ILogger<ExceptionHandlingMiddleware> logger)
@@ -32,9 +36,10 @@ public sealed class ExceptionHandlingMiddleware
         catch (Exception exception)
         {
             _logger.LogError(
-                exception,
-                "Unhandled exception occurred: {Message}",
-                exception.Message);
+         exception,
+         "Unhandled exception occurred while processing {Method} {Path}",
+         httpContext.Request.Method,
+         httpContext.Request.Path);
 
             await HandleExceptionAsync(httpContext, exception);
         }

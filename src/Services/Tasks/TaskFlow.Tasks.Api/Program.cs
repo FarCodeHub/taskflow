@@ -1,8 +1,18 @@
 using TaskFlow.Tasks.Application;
 using TaskFlow.Tasks.Infrastructure;
 using TaskFlow.Tasks.Api.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console();
+});
 
 builder.Services.AddControllers();
 
@@ -23,6 +33,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseGlobalExceptionHandling();
+
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.MapControllers();
