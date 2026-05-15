@@ -1,5 +1,6 @@
 using TaskFlow.Tasks.Application;
 using TaskFlow.Tasks.Infrastructure;
+using TaskFlow.Tasks.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwaggerUI();
 }
-
+app.UseGlobalExceptionHandling();
 app.UseHttpsRedirection();
 
 app.MapControllers();
