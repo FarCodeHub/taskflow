@@ -23,6 +23,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("TasksDatabase")!,
+        name: "tasks-database");
 
 var app = builder.Build();
 
@@ -38,6 +42,11 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 
 app.MapControllers();
+
+
+app.MapHealthChecks("/health");
+
+app.MapHealthChecks("/health/ready");
 
 app.Run();
 
