@@ -14,7 +14,7 @@ public sealed class TasksDbContextFactory : IDesignTimeDbContextFactory<TasksDbC
         var optionsBuilder = new DbContextOptionsBuilder<TasksDbContext>();
 
         optionsBuilder.UseSqlServer(
-            "Server=localhost;Database=TaskFlow.Tasks;Trusted_Connection=True;TrustServerCertificate=True;");
+            "Data Source=192.168.2.150;Initial Catalog=TaskFlow.Tasks;User Id=farhad;Password=folderlock21;TrustServerCertificate=True" );
 
         return new TasksDbContext(optionsBuilder.Options);
     }

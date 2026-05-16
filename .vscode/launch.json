@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build TaskFlow.Tasks.Api",
-      "program": "${workspaceFolder}/src/Services/Tasks/TaskFlow.Tasks.Api/bin/Debug/net9.0/TaskFlow.Tasks.Api.dll",
+      "program": "${workspaceFolder}/src/Services/Tasks/TaskFlow.Tasks.Api/bin/Debug/net10.0/TaskFlow.Tasks.Api.dll",
       "args": [],
       "cwd": "${workspaceFolder}/src/Services/Tasks/TaskFlow.Tasks.Api",
       "stopAtEntry": false,
